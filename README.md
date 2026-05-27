@@ -15,3 +15,17 @@ The app uses AsyncStorage to save your drawings to your phone's memory. Even if 
 
 ## Link:
 ### https://drive.google.com/drive/folders/1892As_NnEnpQCn758ZW8ZlLLqjjCWL1a?usp=sharing
+
+### What Tools Were Used?
+
+React Native & Expo: 
+The main framework used to build the app so it runs smoothly on both Android and iPhones.
+
+TypeScript: 
+A tool that helps write clean code and stops programming errors before the app even runs.
+
+Zustand: 
+A lightweight tool that manages all the drawing logic, like keeping track of your undo/redo history and your layers.
+
+AsyncStorage: 
+A built-in mobile database used to save your drawing files directly onto your phone.
