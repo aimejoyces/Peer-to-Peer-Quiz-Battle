@@ -1,115 +1,110 @@
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useDrawStore } from '../../src/store/drawStore';
-import { useThemeStore } from '../../src/store/themeStore';
-
-import { Ionicons } from '@expo/vector-icons';
-import Slider from '@react-native-community/slider';
-import { StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
+import { StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDrawStore } from '../../src/store/drawStore';
 import { useThemeStore } from '../../src/store/themeStore';
 
 export default function SettingsScreen() {
   const { strokeWidth, setStrokeWidth } = useDrawStore();
-  const { theme, colors, setTheme } = useThemeStore();
+  const { theme, colors, setTheme, toggleTheme } = useThemeStore();
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: Math.max(insets.top, 12) }]}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
       </View>
 
-      {/* Theme Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-          Appearance
-        </Text>
-        <View
-          style={[
-            styles.settingRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <View style={styles.settingLeft}>
-            <Ionicons
-              name="moon"
-              size={22}
-              color={colors.primary}
-            />
-            <Text style={[styles.settingLabel, { color: colors.text }]}>
-              Dark Mode
-            </Text>
-          </View>
-          <Switch
-            value={theme === 'dark'}
-            onValueChange={(val) => setTheme(val ? 'dark' : 'light')}
-            trackColor={{ false: colors.border, true: colors.primaryLight }}
-            thumbColor={theme === 'dark' ? colors.primary : '#f4f3f4'}
-          />
-        </View>
-      </View>
-
-      {/* Brush Settings Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-          Brush Settings
-        </Text>
-        <View
-          style={[
-            styles.settingContainer,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <View style={styles.settingRow}>
-            <Ionicons name="pencil" size={20} color={colors.primary} />
-            <Text style={[styles.settingLabel, { color: colors.text }]}>
-              Stroke Width
-            </Text>
-            <Text
-              style={[styles.settingValue, { color: colors.primary }]}
-            >
-              {Math.round(strokeWidth)}px
-            </Text>
-          </View>
-          <Slider
-            style={styles.slider}
-            minimumValue={1}
-            maximumValue={30}
-            value={strokeWidth}
-            onValueChange={setStrokeWidth}
-            minimumTrackTintColor={colors.primary}
-            maximumTrackTintColor={colors.border}
-            thumbTintColor={colors.primary}
-          />
-        </View>
-      </View>
-
-      {/* About Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-          About
-        </Text>
-        <View
-          style={[
-            styles.aboutBox,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <Text style={[styles.appName, { color: colors.text }]}>DrawCanvas</Text>
-          <Text style={[styles.appVersion, { color: colors.textSecondary }]}>
-            Version 1.1.0
+      <View style={styles.content}>
+        {/* Theme Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            Appearance
           </Text>
-          <Text
+          <View
             style={[
-              styles.appDesc,
-              { color: colors.textSecondary, marginTop: 12 },
+              styles.settingBox,
+              { backgroundColor: colors.surface, borderColor: colors.border },
             ]}
           >
-            A modern and intuitive drawing app for creative sketches and digital artwork.
+            <View style={styles.settingRow}>
+              <View style={styles.settingLeft}>
+                <Ionicons name={theme === 'dark' ? 'moon' : 'sunny'} size={22} color={colors.primary} />
+                <Text style={[styles.settingLabel, { color: colors.text }]}>
+                  {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                </Text>
+              </View>
+              <Switch
+                value={theme === 'dark'}
+                onValueChange={() => toggleTheme()}
+                trackColor={{ false: colors.border, true: colors.primaryLight }}
+                thumbColor={theme === 'dark' ? colors.primary : '#f4f3f4'}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Brush Settings Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            Brush Settings
           </Text>
+          <View
+            style={[
+              styles.settingBox,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <View style={styles.settingRow}>
+              <Ionicons name="pencil" size={20} color={colors.primary} />
+              <Text style={[styles.settingLabel, { color: colors.text }]}>
+                Stroke Width
+              </Text>
+              <Text
+                style={[styles.settingValue, { color: colors.primary }]}
+              >
+                {Math.round(strokeWidth)}px
+              </Text>
+            </View>
+            <Slider
+              style={styles.slider}
+              minimumValue={1}
+              maximumValue={30}
+              value={strokeWidth}
+              onValueChange={setStrokeWidth}
+              minimumTrackTintColor={colors.primary}
+              maximumTrackTintColor={colors.border}
+              thumbTintColor={colors.primary}
+            />
+          </View>
+        </View>
+
+        {/* About Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            About
+          </Text>
+          <View
+            style={[
+              styles.aboutBox,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[styles.appName, { color: colors.text }]}>DrawCanvas</Text>
+            <Text style={[styles.appVersion, { color: colors.textSecondary }]}>
+              Version 1.1.0
+            </Text>
+            <Text
+              style={[
+                styles.appDesc,
+                { color: colors.textSecondary, marginTop: 12 },
+              ]}
+            >
+              A modern and intuitive drawing app for creative sketches and digital artwork.
+            </Text>
+          </View>
         </View>
       </View>
     </View>
@@ -122,7 +117,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  content: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 28,
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 12,
@@ -140,8 +139,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft: 4,
   },
-  settingContainer: {
-    borderRadius: 16,
+  settingBox: {
+    borderRadius: 12,
     borderWidth: 1,
     overflow: 'hidden',
   },
@@ -150,8 +149,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 1,
     gap: 12,
   },
   settingLeft: {
@@ -174,7 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   aboutBox: {
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 20,

@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.aimedorsu.DrawCanvas"
     },
     "web": {
       "output": "static",
@@ -40,6 +41,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e0372242-c9a1-445d-8dd1-5ad4e1cc005e"
+      }
     }
   }
 }

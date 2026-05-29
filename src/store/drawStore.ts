@@ -61,6 +61,7 @@ export interface Command {
 export interface DrawState {
   layers: Layer[];
   activeLayerId: string;
+  currentDrawingId: string | null;
 
   color: string | null;
   strokeWidth: number;
@@ -88,6 +89,9 @@ export interface DrawState {
   setOffset: (o: { x: number; y: number }) => void;
 
   saveDrawing: (name: string) => Promise<void>;
+  loadDrawing: (id: string) => Promise<void>;
+  deleteDrawing: (id: string) => Promise<void>;
+  resetCanvas: () => void;
   loadDrawings: () => Promise<SavedDrawing[]>;
 }
 
@@ -95,19 +99,21 @@ export interface DrawState {
    STORE IMPLEMENTATION
 ========================= */
 
+const INITIAL_LAYERS = [
+  {
+    id: 'layer-1',
+    name: 'Layer 1',
+    visible: true,
+    strokes: [],
+  },
+];
+
 export const useDrawStore = create<DrawState>((set, get) => ({
   /* ---------- Initial State ---------- */
 
-  layers: [
-    {
-      id: 'layer-1',
-      name: 'Layer 1',
-      visible: true,
-      strokes: [],
-    },
-  ],
-
+  layers: INITIAL_LAYERS,
   activeLayerId: 'layer-1',
+  currentDrawingId: null,
 
   color: null,
   strokeWidth: 4,
@@ -193,40 +199,89 @@ export const useDrawStore = create<DrawState>((set, get) => ({
 
   /* ---------- Persistence ---------- */
 
+  resetCanvas: () => set({
+    layers: INITIAL_LAYERS,
+    activeLayerId: 'layer-1',
+    currentDrawingId: null,
+    history: [],
+    redoStack: [],
+  }),
+
   saveDrawing: async (name: string) => {
     try {
       const key = 'drawcanvas:drawings';
-
       const existing = await AsyncStorage.getItem(key);
+      let drawings: SavedDrawing[] = existing ? JSON.parse(existing) : [];
 
-      const drawings: SavedDrawing[] = existing
-        ? JSON.parse(existing)
-        : [];
+      const { currentDrawingId, layers } = get();
+      const now = Date.now();
 
-      const newDrawing: SavedDrawing = {
-        id: Date.now().toString(),
-        name,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        thumbnail: '', // Add thumbnail later
-        layers: get().layers,
-      };
+      if (currentDrawingId) {
+        // Update existing
+        drawings = drawings.map(d => 
+          d.id === currentDrawingId 
+            ? { ...d, name, updatedAt: now, layers } 
+            : d
+        );
+      } else {
+        // Create new
+        const newDrawing: SavedDrawing = {
+          id: now.toString(),
+          name,
+          createdAt: now,
+          updatedAt: now,
+          thumbnail: '', // Add thumbnail later
+          layers,
+        };
+        drawings.push(newDrawing);
+        set({ currentDrawingId: newDrawing.id });
+      }
 
-      await AsyncStorage.setItem(
-        key,
-        JSON.stringify([...drawings, newDrawing])
-      );
+      await AsyncStorage.setItem(key, JSON.stringify(drawings));
     } catch (error) {
       console.error('Failed to save drawing:', error);
+      throw error;
+    }
+  },
+
+  loadDrawing: async (id: string) => {
+    try {
+      const drawings = await get().loadDrawings();
+      const drawing = drawings.find(d => d.id === id);
+      if (drawing) {
+        set({
+          layers: drawing.layers,
+          activeLayerId: drawing.layers[0]?.id || 'layer-1',
+          currentDrawingId: drawing.id,
+          history: [],
+          redoStack: [],
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load drawing:', error);
+    }
+  },
+
+  deleteDrawing: async (id: string) => {
+    try {
+      const key = 'drawcanvas:drawings';
+      const drawings = await get().loadDrawings();
+      const filtered = drawings.filter(d => d.id !== id);
+      await AsyncStorage.setItem(key, JSON.stringify(filtered));
+      
+      if (get().currentDrawingId === id) {
+        get().resetCanvas();
+      }
+    } catch (error) {
+      console.error('Failed to delete drawing:', error);
+      throw error;
     }
   },
 
   loadDrawings: async () => {
     try {
       const key = 'drawcanvas:drawings';
-
       const data = await AsyncStorage.getItem(key);
-
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('Failed to load drawings:', error);
