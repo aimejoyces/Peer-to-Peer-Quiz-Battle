@@ -42,10 +42,8 @@ export default function Toolbar() {
               style={[
                 styles.colorDot,
                 { backgroundColor: c },
-                store.color === c && !store.isEraser && [
-                  styles.activeDot,
-                  { borderColor: colors.primary, borderWidth: 3 },
-                ],
+                store.color === c && !store.isEraser && styles.activeDot,
+                store.color === c && !store.isEraser && { borderColor: colors.primary },
               ]}
             />
           ))}
@@ -98,7 +96,7 @@ export default function Toolbar() {
           ]}
         >
           <Ionicons
-            name="eraser"
+            name="create-outline"
             size={18}
             color={store.isEraser ? '#fff' : colors.text}
           />
@@ -150,18 +148,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   colorDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
   },
   activeDot: {
-    transform: [{ scale: 1.1 }],
+    transform: [{ scale: 1.2 }],
+    borderWidth: 3,
   },
   widthHeader: {
     flexDirection: 'row',
